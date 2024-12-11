@@ -33,7 +33,8 @@ export default function Home() {
       });
     
       const data = await response.json();
-      const aiMessage : Message= { role: "ai", content: data.reply }; // `data.reply`-এ API থেকে AI এর রেসপন্স থাকবে
+      const aiMessage : Message
+      = { role: "ai", content: data.reply }; // `data.reply`-এ API থেকে AI এর রেসপন্স থাকবে
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error:", error);
