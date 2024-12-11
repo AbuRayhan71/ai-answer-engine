@@ -10,7 +10,7 @@ type Message = {
 export default function Home() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "Hello! How can I help you today?" },
+    { role: "ai", content: "আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি? 😊" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +18,7 @@ export default function Home() {
     if (!message.trim()) return;
 
     // Add user message to the conversation
-    const userMessage = { role: "user" as const, content: message };
+    const userMessage : Message = { role: "user" as const, content: message };
     setMessages(prev => [...prev, userMessage]);
     setMessage("");
     setIsLoading(true);
@@ -31,18 +31,20 @@ export default function Home() {
         },
         body: JSON.stringify({ message }),
       });
-
-      // TODO: Handle the response from the chat API to display the AI response in the UI
-
-
-
-
+    
+      const data = await response.json();
+      const aiMessage : Message= { role: "ai", content: data.reply }; // `data.reply`-এ API থেকে AI এর রেসপন্স থাকবে
+      setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error:", error);
+      setMessages(prev => [
+        ...prev,
+        { role: "ai", content: "দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।" },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  };
+  };    
 
 
   // TODO: Modify the color schemes, fonts, and UI as needed for a good user experience
@@ -52,7 +54,7 @@ export default function Home() {
       {/* Header */}
       <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-xl font-semibold text-white">Chat</h1>
+          <h1 className="text-xl font-semibold text-white">রিসার্চ চ্যাট</h1>
         </div>
       </div>
 
