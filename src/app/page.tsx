@@ -10,7 +10,7 @@ type Message = {
 export default function Home() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি? 😊" },
+    { role: "ai", content: "How can I help you today master ! " },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,7 +52,7 @@ export default function Home() {
       console.error("Error:", error);
       setMessages(prev => [
         ...prev,
-        { role: "ai", content: "দুঃখিত, কিছু ভুল হয়েছে। আবার চেষ্টা করুন।" },
+        { role: "ai", content: "Sorry someting went wrong , could you please try again " },
       ]);
     } finally {
       setIsLoading(false);
@@ -64,7 +64,7 @@ export default function Home() {
       {/* Header */}
       <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-xl font-semibold text-white">রিসার্চ চ্যাট</h1>
+          <h1 className="text-xl font-semibold text-white"> Research GPT </h1>
         </div>
       </div>
 
