@@ -10,7 +10,7 @@ type Message = {
 export default function Home() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "How can I help you today master ! " },
+    { role: "ai", content: "How can I assist you today, Master? 😊" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,7 +19,7 @@ export default function Home() {
 
     // Add user message to the conversation
     const userMessage: Message = { role: "user", content: message };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setMessage("");
     setIsLoading(true);
 
@@ -33,26 +33,30 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
       const data = await response.json();
       const aiMessage: Message = { role: "ai", content: data.aiResponse };
 
-      // Optionally include scraped content
-      if (data.scraping.staticContent) {
-        aiMessage.content += `\nScraped Text: ${data.scraping.staticContent}`;
+      // Include scraped content if available
+      if (data.scraping?.staticContent) {
+        aiMessage.content += `\n\n**Scraped Static Content:**\n${data.scraping.staticContent}`;
       }
-      if (data.scraping.dynamicContent) {
-        aiMessage.content += `\nDynamic Content: ${data.scraping.dynamicContent}`;
+      if (data.scraping?.dynamicContent) {
+        aiMessage.content += `\n\n**Dynamic Content:**\n${data.scraping.dynamicContent}`;
       }
 
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error:", error);
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
-        { role: "ai", content: "Sorry someting went wrong , could you please try again " },
+        {
+          role: "ai",
+          content:
+            "Sorry, something went wrong. Could you please try again? 🙇",
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -64,7 +68,7 @@ export default function Home() {
       {/* Header */}
       <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-xl font-semibold text-white"> Research GPT </h1>
+          <h1 className="text-xl font-semibold text-white">Research GPT</h1>
         </div>
       </div>
 
@@ -81,7 +85,7 @@ export default function Home() {
               }`}
             >
               <div
-                className={`p-2 rounded ${
+                className={`p-3 rounded-xl max-w-[75%] ${
                   msg.role === "ai"
                     ? "bg-gray-700 text-white"
                     : "bg-blue-500 text-white"
@@ -102,13 +106,13 @@ export default function Home() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={isLoading}
-            className="flex-1 p-2 rounded bg-gray-700 text-white"
+            className="flex-1 p-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Type your message..."
           />
           <button
             onClick={handleSend}
             disabled={isLoading}
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300"
+            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
             {isLoading ? "Sending..." : "Send"}
           </button>
