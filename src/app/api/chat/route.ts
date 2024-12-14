@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     // Initialize Groq AI client
     const client = new GroqClient({
-      apiKey: process.env.GROQ_API_KEY || '', // Use environment variable for security
+      apiKey: process.env.GROQ_API_KEY || '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', // Use environment variable for security
     });
 
     // Query Groq AI with the provided message
