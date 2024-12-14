@@ -1,19 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Message = {
   role: "user" | "ai";
-  content: string | JSX.Element[];
+  content: string; // Store only plain text here
   sources?: { url: string; description: string }[];
 };
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "How can I assist you today? 😊" },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load conversation from URL
+  useEffect(() => {
+    const savedConversation = new URLSearchParams(window.location.search).get(
+      "conversation"
+    );
+    if (savedConversation) {
+      try {
+        const parsedMessages = JSON.parse(decodeURIComponent(savedConversation));
+        setMessages(parsedMessages);
+      } catch (error) {
+        console.error("Failed to parse conversation:", error);
+      }
+    } else {
+      // Initialize with default message if no conversation exists
+      setMessages([{ role: "ai", content: "How can I assist you today? 😊" }]);
+    }
+  }, []);
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -37,13 +53,13 @@ export default function Home() {
       }
 
       const data = await response.json();
-
-      const formattedContent = formatContentWithLinks(data.aiResponse);
-
       const aiMessage: Message = {
         role: "ai",
-        content: formattedContent,
-        sources: data.sources,
+        content: data.aiResponse,
+        sources: data.citations?.map((citation: { url: string }) => ({
+          url: citation.url,
+          description: citation.url, // Optional: Adjust this for better readability
+        })),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -53,8 +69,7 @@ export default function Home() {
         ...prev,
         {
           role: "ai",
-          content:
-            "Oops! Something went wrong. Please try again. 🙇",
+          content: "Oops! Something went wrong. Please try again. 🙇",
         },
       ]);
     } finally {
@@ -62,33 +77,44 @@ export default function Home() {
     }
   };
 
-  // Helper function to format response with clickable links
+  const handleShare = () => {
+    const encodedConversation = encodeURIComponent(JSON.stringify(messages));
+    const shareableURL = `${window.location.origin}?conversation=${encodedConversation}`;
+    navigator.clipboard.writeText(shareableURL);
+    alert("Conversation link copied to clipboard!");
+  };
+
   const formatContentWithLinks = (text: string) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.split(urlRegex).map((part, index) => {
-      if (urlRegex.test(part)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:underline"
-          >
-            {part}
-          </a>
-        );
-      }
-      return part;
-    });
+    return text.split(urlRegex).map((part, index) =>
+      urlRegex.test(part) ? (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-400 hover:underline"
+        >
+          {part}
+        </a>
+      ) : (
+        part
+      )
+    );
   };
 
   return (
     <div className="flex flex-col h-screen bg-gray-900">
       {/* Header */}
       <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-semibold text-white">AI Nexus</h1>
+          <button
+            onClick={handleShare}
+            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition"
+          >
+            Share Conversation
+          </button>
         </div>
       </div>
 
@@ -111,12 +137,12 @@ export default function Home() {
                     : "bg-blue-500 text-white"
                 }`}
               >
-                {/* Render formatted content */}
-                {Array.isArray(msg.content)
-                  ? msg.content.map((part, i) => <span key={i}>{part}</span>)
-                  : msg.content}
-                {/* Render sources */}
-                {msg.sources && msg.sources.length > 0 && (
+                <p>
+                  {msg.role === "ai"
+                    ? formatContentWithLinks(msg.content)
+                    : msg.content}
+                </p>
+                {msg.sources && (
                   <div className="mt-2 text-sm">
                     <p className="font-semibold">Sources:</p>
                     <ul className="list-disc pl-5">
@@ -128,7 +154,7 @@ export default function Home() {
                             rel="noopener noreferrer"
                             className="text-blue-400 hover:underline"
                           >
-                            {source.description || source.url}
+                            {source.description}
                           </a>
                         </li>
                       ))}
