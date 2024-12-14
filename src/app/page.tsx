@@ -108,7 +108,7 @@ export default function Home() {
       {/* Header */}
       <div className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg p-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-extrabold text-white tracking-wide font-mono">AI Nexus</h1>
+          <h1 className="text-3xl font-extrabold text-white tracking-wide font-mono">Gobeshona.io </h1>
           <button
             onClick={handleShare}
             className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition font-semibold"
@@ -130,7 +130,7 @@ export default function Home() {
             >
               <div
                 className={`p-4 rounded-lg shadow-lg max-w-[75%] leading-relaxed text-sm md:text-base font-mono ${
-                  msg.role === "ai" ? "bg-blue-500 text-white" : "bg-purple-700 text-white"
+                  msg.role === "ai" ? "bg-pink-530 text-white" : "bg-blue-500 text-white"
                 }`}
               >
                 <p>{msg.role === "ai" ? formatContentWithLinks(msg.content) : msg.content}</p>

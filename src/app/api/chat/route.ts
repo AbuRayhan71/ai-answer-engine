@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
     // Initialize Groq AI client
     const client = new GroqClient({
-      apiKey: "your-api-key", // Replace with your actual API key
+      apiKey: "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",
     });
 
     const scrapedData: { url: string; staticContent: string; dynamicContent: string }[] = [];
