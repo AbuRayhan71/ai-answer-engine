@@ -10,14 +10,13 @@ type Message = {
 export default function Home() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "How can I assist you today, Master? 😊" },
+    { role: "ai", content: "Hi there! How can I assist you today? 😊" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
     if (!message.trim()) return;
 
-    // Add user message to the conversation
     const userMessage: Message = { role: "user", content: message };
     setMessages((prev) => [...prev, userMessage]);
     setMessage("");
@@ -29,7 +28,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message, url: "" }), // Add URL if needed
+        body: JSON.stringify({ message }),
       });
 
       if (!response.ok) {
@@ -39,14 +38,6 @@ export default function Home() {
       const data = await response.json();
       const aiMessage: Message = { role: "ai", content: data.aiResponse };
 
-      // Include scraped content if available
-      if (data.scraping?.staticContent) {
-        aiMessage.content += `\n\n**Scraped Static Content:**\n${data.scraping.staticContent}`;
-      }
-      if (data.scraping?.dynamicContent) {
-        aiMessage.content += `\n\n**Dynamic Content:**\n${data.scraping.dynamicContent}`;
-      }
-
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error:", error);
@@ -54,8 +45,7 @@ export default function Home() {
         ...prev,
         {
           role: "ai",
-          content:
-            "Sorry, something went wrong. Could you please try again? 🙇",
+          content: "Oops! Something went wrong. Please try again. 😓",
         },
       ]);
     } finally {
@@ -64,55 +54,62 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-900 to-black text-white">
       {/* Header */}
-      <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-xl font-semibold text-white">Research GPT</h1>
+      <div className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 shadow-md">
+        <div className="max-w-4xl mx-auto p-4">
+          <h1 className="text-2xl font-bold text-center">Research GPT</h1>
         </div>
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto pb-32 pt-4">
-        <div className="max-w-3xl mx-auto px-4">
+      <div className="flex-1 overflow-y-auto py-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+        <div className="max-w-4xl mx-auto px-4 space-y-4">
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`flex gap-4 mb-4 ${
-                msg.role === "ai"
-                  ? "justify-start"
-                  : "justify-end flex-row-reverse"
+              className={`flex ${
+                msg.role === "ai" ? "justify-start" : "justify-end"
               }`}
             >
               <div
-                className={`p-3 rounded-xl max-w-[75%] ${
+                className={`px-4 py-3 rounded-3xl max-w-[75%] text-sm whitespace-pre-wrap ${
                   msg.role === "ai"
-                    ? "bg-gray-700 text-white"
-                    : "bg-blue-500 text-white"
+                    ? "bg-indigo-600 text-white shadow-md"
+                    : "bg-green-600 text-white shadow-md"
                 }`}
               >
                 {msg.content}
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="flex items-center gap-2 px-4 py-3 rounded-3xl bg-indigo-600 text-white shadow-md">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]"></div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Input Container */}
-      <div className="fixed bottom-0 w-full bg-gray-800 p-4">
-        <div className="max-w-3xl mx-auto flex gap-4">
+      <div className="fixed bottom-0 w-full bg-gray-800 shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={isLoading}
-            className="flex-1 p-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Type your message..."
+            className="flex-1 px-4 py-3 rounded-full bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Type your message here..."
           />
           <button
             onClick={handleSend}
             disabled={isLoading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="px-6 py-3 rounded-full bg-purple-600 text-white font-semibold hover:bg-purple-700 disabled:bg-gray-500 transition"
           >
             {isLoading ? "Sending..." : "Send"}
           </button>
