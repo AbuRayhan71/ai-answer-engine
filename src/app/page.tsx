@@ -4,13 +4,14 @@ import { useState } from "react";
 
 type Message = {
   role: "user" | "ai";
-  content: string;
+  content: string | JSX.Element[];
+  sources?: { url: string; description: string }[];
 };
 
 export default function Home() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
-    { role: "ai", content: "Hi there! How can I assist you today? 😊" },
+    { role: "ai", content: "How can I assist you today? 😊" },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +37,14 @@ export default function Home() {
       }
 
       const data = await response.json();
-      const aiMessage: Message = { role: "ai", content: data.aiResponse };
+
+      const formattedContent = formatContentWithLinks(data.aiResponse);
+
+      const aiMessage: Message = {
+        role: "ai",
+        content: formattedContent,
+        sources: data.sources,
+      };
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
@@ -45,7 +53,8 @@ export default function Home() {
         ...prev,
         {
           role: "ai",
-          content: "Oops! Something went wrong. Please try again. 😓",
+          content:
+            "Oops! Something went wrong. Please try again. 🙇",
         },
       ]);
     } finally {
@@ -53,39 +62,85 @@ export default function Home() {
     }
   };
 
+  // Helper function to format response with clickable links
+  const formatContentWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.split(urlRegex).map((part, index) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+    <div className="flex flex-col h-screen bg-gray-900">
       {/* Header */}
-      <div className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 shadow-md">
-        <div className="max-w-4xl mx-auto p-4">
-          <h1 className="text-2xl font-bold text-center">Research GPT</h1>
+      <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-xl font-semibold text-white">AI Nexus</h1>
         </div>
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto py-6 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-        <div className="max-w-4xl mx-auto px-4 space-y-4">
+      <div className="flex-1 overflow-y-auto pb-32 pt-4">
+        <div className="max-w-3xl mx-auto px-4">
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`flex ${
-                msg.role === "ai" ? "justify-start" : "justify-end"
+              className={`flex gap-4 mb-4 ${
+                msg.role === "ai"
+                  ? "justify-start"
+                  : "justify-end flex-row-reverse"
               }`}
             >
               <div
-                className={`px-4 py-3 rounded-3xl max-w-[75%] text-sm whitespace-pre-wrap ${
+                className={`p-3 rounded-xl max-w-[75%] ${
                   msg.role === "ai"
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "bg-green-600 text-white shadow-md"
+                    ? "bg-gray-700 text-white"
+                    : "bg-blue-500 text-white"
                 }`}
               >
-                {msg.content}
+                {/* Render formatted content */}
+                {Array.isArray(msg.content)
+                  ? msg.content.map((part, i) => <span key={i}>{part}</span>)
+                  : msg.content}
+                {/* Render sources */}
+                {msg.sources && msg.sources.length > 0 && (
+                  <div className="mt-2 text-sm">
+                    <p className="font-semibold">Sources:</p>
+                    <ul className="list-disc pl-5">
+                      {msg.sources.map((source, idx) => (
+                        <li key={idx}>
+                          <a
+                            href={source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline"
+                          >
+                            {source.description || source.url}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="flex items-center gap-2 px-4 py-3 rounded-3xl bg-indigo-600 text-white shadow-md">
+              <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gray-700 text-white">
                 <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.2s]"></div>
                 <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]"></div>
@@ -96,20 +151,20 @@ export default function Home() {
       </div>
 
       {/* Input Container */}
-      <div className="fixed bottom-0 w-full bg-gray-800 shadow-lg">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
+      <div className="fixed bottom-0 w-full bg-gray-800 p-4">
+        <div className="max-w-3xl mx-auto flex gap-4">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={isLoading}
-            className="flex-1 px-4 py-3 rounded-full bg-gray-700 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Type your message here..."
+            className="flex-1 p-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Type your message..."
           />
           <button
             onClick={handleSend}
             disabled={isLoading}
-            className="px-6 py-3 rounded-full bg-purple-600 text-white font-semibold hover:bg-purple-700 disabled:bg-gray-500 transition"
+            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
             {isLoading ? "Sending..." : "Send"}
           </button>
