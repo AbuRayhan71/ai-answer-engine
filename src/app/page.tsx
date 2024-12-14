@@ -104,14 +104,14 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-gray-100">
       {/* Header */}
-      <div className="w-full bg-gray-800 border-b border-gray-700 p-4">
-        <div className="max-w-3xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-white">AI Nexus</h1>
+      <div className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg p-4">
+        <div className="max-w-4xl mx-auto flex justify-between items-center">
+          <h1 className="text-3xl font-extrabold text-white tracking-wide font-mono">AI Nexus</h1>
           <button
             onClick={handleShare}
-            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition"
+            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition font-semibold"
           >
             Share Conversation
           </button>
@@ -119,40 +119,32 @@ export default function Home() {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto pb-32 pt-4">
-        <div className="max-w-3xl mx-auto px-4">
+      <div className="flex-1 overflow-y-auto py-6 px-4">
+        <div className="max-w-4xl mx-auto space-y-6">
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={`flex gap-4 mb-4 ${
-                msg.role === "ai"
-                  ? "justify-start"
-                  : "justify-end flex-row-reverse"
+              className={`flex gap-4 ${
+                msg.role === "ai" ? "justify-start" : "justify-end flex-row-reverse"
               }`}
             >
               <div
-                className={`p-3 rounded-xl max-w-[75%] ${
-                  msg.role === "ai"
-                    ? "bg-gray-700 text-white"
-                    : "bg-blue-500 text-white"
+                className={`p-4 rounded-lg shadow-lg max-w-[75%] leading-relaxed text-sm md:text-base font-mono ${
+                  msg.role === "ai" ? "bg-blue-500 text-white" : "bg-purple-700 text-white"
                 }`}
               >
-                <p>
-                  {msg.role === "ai"
-                    ? formatContentWithLinks(msg.content)
-                    : msg.content}
-                </p>
+                <p>{msg.role === "ai" ? formatContentWithLinks(msg.content) : msg.content}</p>
                 {msg.sources && (
-                  <div className="mt-2 text-sm">
+                  <div className="mt-4">
                     <p className="font-semibold">Sources:</p>
-                    <ul className="list-disc pl-5">
+                    <ul className="list-disc pl-5 text-gray-200">
                       {msg.sources.map((source, idx) => (
                         <li key={idx}>
                           <a
                             href={source.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-400 hover:underline"
+                            className="hover:underline"
                           >
                             {source.description}
                           </a>
@@ -166,7 +158,7 @@ export default function Home() {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gray-700 text-white">
+              <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-gray-700 text-gray-200">
                 <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.2s]"></div>
                 <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]"></div>
@@ -177,20 +169,20 @@ export default function Home() {
       </div>
 
       {/* Input Container */}
-      <div className="fixed bottom-0 w-full bg-gray-800 p-4">
-        <div className="max-w-3xl mx-auto flex gap-4">
+      <div className="fixed bottom-0 w-full bg-gray-800 p-4 shadow-inner">
+        <div className="max-w-4xl mx-auto flex items-center gap-4">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             disabled={isLoading}
-            className="flex-1 p-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 p-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="Type your message..."
           />
           <button
             onClick={handleSend}
             disabled={isLoading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-blue-500 text-white rounded-xl font-bold hover:bg-blue-600 transition disabled:bg-gray-600 disabled:cursor-not-allowed"
           >
             {isLoading ? "Sending..." : "Send"}
           </button>
